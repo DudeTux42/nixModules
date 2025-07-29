@@ -20,7 +20,7 @@ in
       ripgrep
       fd
       gcc
-      texlifeFull
+      texliveFull
       tectonic
       nodePackages.mermaid-cli
       sqlite
