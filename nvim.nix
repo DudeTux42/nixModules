@@ -3,7 +3,7 @@
 let
   dotnvim = builtins.fetchGit {
     url = "https://github.com/DudeTux42/dotnvim";
-    rev = "978dff86407d08d5f9344fe8ca9e6887f6460e33";
+    rev = "a1352a10fc26aaf888307899ccdceced0f8d2816";
   };
 in
 {
@@ -26,6 +26,7 @@ in
       sqlite
       ghostscript
       imagemagick
+      luarocks
 
       # weitere Tools, die du in nvim brauchst
     ];

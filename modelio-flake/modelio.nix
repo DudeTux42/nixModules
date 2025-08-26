@@ -7,8 +7,8 @@ stdenv.mkDerivation rec {
   src = fetchFromGitHub {
     owner = "ModelioOpenSource";
     repo = "Modelio";
-    rev = "main"; # oder spezifischer commit
-    sha256 = lib.fakeSha256; # Wird beim ersten Build ersetzt
+    rev = "v5.4.1";  # ✅ Verwendet den v5.4.1 Tag
+    sha256 = "sha256-YC6NQB1PjjnRkJ4rsNSn+kls2KWvMQgF+VtIDnZh5kM"; # Wird beim ersten Build ersetzt
   };
 
   nativeBuildInputs = [ jdk8 ant ivy makeWrapper ];
@@ -17,21 +17,27 @@ stdenv.mkDerivation rec {
   buildPhase = ''
     echo "🔨 Building Modelio..."
     export JAVA_HOME=${jdk8}
-    ant download-ivy
+    
+    # Ivy herunterladen falls nötig
+    if [ ! -d "$HOME/.ant/lib" ]; then
+      ant download-ivy
+    fi
+    
+    # Build
     ant clean jar
   '';
 
   installPhase = ''
-    echo "📦 Installing Modelio..."
+    echo "v5.4.1"
     mkdir -p $out/lib/modelio $out/bin $out/share/applications
 
-    # JAR-Dateien kopieren
-    if [ -d "build" ]; then
-      cp -r build/*.jar $out/lib/modelio/ 2>/dev/null || true
-    fi
+    # JAR-Dateien suchen und kopieren
+    find . -name "*.jar" -path "./build/*" -exec cp {} $out/lib/modelio/ \; || true
+    find . -name "*.jar" -path "./dist/*" -exec cp {} $out/lib/modelio/ \; || true
     
-    if [ -d "dist" ]; then
-      cp -r dist/* $out/lib/modelio/ 2>/dev/null || true
+    # Falls es eine main JAR gibt
+    if [ -f "build/modelio.jar" ]; then
+      cp build/modelio.jar $out/lib/modelio/
     fi
 
     # Executable wrapper
@@ -57,7 +63,6 @@ EOF
     description = "Open Source Modeling Environment";
     homepage = "https://github.com/ModelioOpenSource/Modelio";
     license = licenses.gpl3Plus;
-    maintainers = [ maintainers.dudetux42 ]; # Du!
     platforms = platforms.linux;
   };
 }

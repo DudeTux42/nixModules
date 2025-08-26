@@ -14,7 +14,7 @@
     theme "catppuccin"
     
     // Copy behavior
-    copy_on_select false
+    copy_on_select true
     copy_command "wl-copy"  // For Wayland, use "xclip -selection clipboard" for X11
     
     // Mouse behavior
