@@ -3,10 +3,13 @@
 {
   programs.git = {
     enable = true;
-    userName = "ll";
-    userEmail = "lindermayr@b1-systems.de";  # Standard: Arbeitsmail (überall)
     
-    extraConfig = {
+    settings = {
+      user = {
+        name = "ll";
+        email = "lindermayr@b1-systems.de";  # Standard: Arbeitsmail (überall)
+      };
+      
       init.defaultBranch = "main";
       core.editor = "nvim";
       pull.rebase = false;
@@ -14,16 +17,16 @@
       
       # Conditional includes für private GitHub Projekte
       includeIf."gitdir:~/Documents/arbeit/".path = "~/.gitconfig-github";
-    };
-    
-    aliases = {
-      co = "checkout";
-      br = "branch";
-      ci = "commit";
-      st = "status";
-      unstage = "reset HEAD --";
-      last = "log -1 HEAD";
-      lg = "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
+      
+      alias = {
+        co = "checkout";
+        br = "branch";
+        ci = "commit";
+        st = "status";
+        unstage = "reset HEAD --";
+        last = "log -1 HEAD";
+        lg = "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit";
+      };
     };
   };
   

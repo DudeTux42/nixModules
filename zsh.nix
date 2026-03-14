@@ -33,7 +33,7 @@
       path = "${config.xdg.dataHome}/zsh/history";
     };
     
-    initExtra = ''
+    initContent = ''
       # Custom prompt
       autoload -Uz vcs_info
       precmd() { vcs_info }
