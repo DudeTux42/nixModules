@@ -17,8 +17,7 @@
       homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [
-          /home/ll/.config/home-manager/home.nix  
-          ./nvim.nix  # Same here; adjust path if needed
+          /home/ll/.config/home-manager/home.nix
         ];
         extraSpecialArgs = { inherit username homeDirectory; };
       };

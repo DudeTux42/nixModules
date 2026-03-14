@@ -3,7 +3,7 @@
 let
   dotnvim = builtins.fetchGit {
     url = "https://github.com/DudeTux42/dotnvim";
-    rev = "a1352a10fc26aaf888307899ccdceced0f8d2816";
+    rev = "ccc3934ec2e8a34f9d34d985e095ff17849c527e";
   };
 in
 {

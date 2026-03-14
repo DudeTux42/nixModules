@@ -8,7 +8,7 @@
     // Zellij Configuration
     
     // Default shell
-    default_shell "bash"
+    default_shell "zsh"
     
     // Theme
     theme "catppuccin"
@@ -29,7 +29,7 @@
     session_serialization false
     
     // Keybindings
-    keybinds {
+    keybinds non_colliding=true {
         normal {
             // Movement between panes
             bind "Alt h" { MoveFocus "Left"; }

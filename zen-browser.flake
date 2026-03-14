@@ -1,0 +1,22 @@
+{
+  description = "NixOS Flake für Zen Browser";
+
+  inputs = {
+    # Dein normaler Nixpkgs-Input
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    
+    # Zen Browser Flake hinzufügen
+    zen-browser = {
+      url = "github:youwen5/zen-browser-flake";
+      # Stellt sicher, dass die Nixpkgs-Version konsistent ist
+      inputs.nixpkgs.follows = "nixpkgs"; 
+    };
+    
+    # ... weitere Inputs ...
+  };
+  
+  # Stelle sicher, dass "zen-browser" hier im Outputs-Argument steht
+  outputs = { self, nixpkgs, zen-browser, ... }@inputs: {
+    # ... deine Outputs ...
+  };
+}

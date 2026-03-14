@@ -1,9 +1,10 @@
 { pkgs, ... }:
 
-let
-  allNerdFonts = builtins.filter pkgs.lib.attrsets.isDerivation
-    (builtins.attrValues pkgs.nerd-fonts);
-in
 {
-  home.packages = allNerdFonts;
+  home.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.fira-code
+    nerd-fonts.hack
+    poppins
+  ];
 }
