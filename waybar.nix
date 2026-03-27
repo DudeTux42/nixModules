@@ -17,8 +17,8 @@
         "hyprland/workspaces" = {
           format = "{icon}";
           on-click = "activate";
-          on-scroll-up = "hyprctl dispatch workspace e+1";
-          on-scroll-down = "hyprctl dispatch workspace e-1";
+          on-scroll-up = "hyprctl dispatch workspace m+1";
+          on-scroll-down = "hyprctl dispatch workspace m-1";
           format-icons = {
             "1" = "󰲠";
             "2" = "󰲢";
