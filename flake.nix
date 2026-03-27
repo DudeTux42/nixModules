@@ -1,25 +1,60 @@
 {
-  description = "Home Manager + Neovim config flake (non-flat structure)";
+  description = "NixOS System Configuration Flake";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    awww.url = "git+https://codeberg.org/LGFae/awww";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, awww, ... }@inputs:
     let
       system = "x86_64-linux";
-      username = "ll"; # Change to your actual username
-      homeDirectory = "/home/ll"; # Change to your actual home dir
-      pkgs = import nixpkgs { inherit system; };
-    in {
-      homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./home.nix
-        ];
-        extraSpecialArgs = { inherit username homeDirectory; };
+      
+      # Overlay für unstable packages
+      overlays = [
+        (final: prev: {
+          unstable = import inputs.nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        })
+      ];
+    in
+    {
+      nixosConfigurations = {
+        nixos = nixpkgs.lib.nixosSystem {
+          inherit system;
+          
+          specialArgs = { inherit inputs; };
+          
+          modules = [
+            # Hardware config
+            ./hardware-configuration.nix
+            
+            # Apply overlay
+            { nixpkgs.overlays = overlays; }
+            
+            # Main system configuration
+            ./system/configuration.nix
+            
+            # VirtualBox module
+            ./vbox.nix
+            
+            # Home Manager integration
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "backup";
+              home-manager.users.ll = import ./home.nix;
+            }
+          ];
+        };
       };
     };
 }

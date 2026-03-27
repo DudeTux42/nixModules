@@ -15,10 +15,11 @@
       "..." = "cd ../..";
       
       # Nix shortcuts
-      nrs = "sudo nixos-rebuild switch";
-      nrt = "sudo nixos-rebuild test";
+      nrs = "sudo nixos-rebuild switch --flake /home/ll/nix#nixos";
+      nrt = "sudo nixos-rebuild test --flake /home/ll/nix#nixos";
       hms = "home-manager switch --flake ~/nix#ll";
       nfu = "nix flake update";
+      ncf = "sudo nvim /home/ll/nix/system/configuration.nix";
       
       # Git shortcuts
       gs = "git status";
@@ -26,22 +27,31 @@
       gc = "git commit";
       gp = "git push";
       gl = "git pull";
+
     };
     
     history = {
       size = 10000;
       path = "${config.xdg.dataHome}/zsh/history";
     };
+
+    plugins = [
+      {
+        name = "powerlevel10k";
+        src = pkgs.zsh-powerlevel10k;
+        file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+      }
+    ];
     
     initContent = ''
-      # Custom prompt
-      autoload -Uz vcs_info
-      precmd() { vcs_info }
-      
-      zstyle ':vcs_info:git:*' formats '%b '
-      
-      setopt PROMPT_SUBST
-      PROMPT='%F{cyan}%n@%m%f:%F{blue}%~%f %F{yellow}''${vcs_info_msg_0_}%f%# '
+      # Powerlevel10k config
+      [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
     '';
+  };
+
+  # Declaratively manage p10k config
+  home.file.".p10k.zsh" = {
+    source = ./p10k.zsh;
+    force = true;
   };
 }

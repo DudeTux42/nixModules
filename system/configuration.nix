@@ -1,0 +1,337 @@
+{ config, pkgs, lib, inputs, ... }:
+
+{
+  # Hardware configuration wird von flake.nix importiert
+
+  # ════════════════════════════════════════════════════════════════
+  # Boot & Kernel
+  # ════════════════════════════════════════════════════════════════
+  boot = {
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+      grub.enable = false;
+    };
+    kernelPackages = pkgs.linuxPackages_latest;
+    kernelParams = [
+      "i915.enable_fbc=1"
+      "i915.enable_psr=1"
+    ];
+    kernelModules = [ "qmi_wwan" "cdc_wdm" "usbnet" ];
+    initrd.availableKernelModules = [ "qmi_wwan" "cdc_wdm" ];
+    binfmt.emulatedSystems = [ "aarch64-linux" ];
+  };
+
+  # ════════════════════════════════════════════════════════════════
+  # Hardware (Intel T480s)
+  # ════════════════════════════════════════════════════════════════
+  hardware = {
+    graphics = {
+      enable = true;
+      enable32Bit = true;
+      extraPackages = with pkgs; [
+        intel-media-driver
+        intel-vaapi-driver
+        libvdpau-va-gl
+        intel-compute-runtime
+      ];
+    };
+    cpu.intel.updateMicrocode = true;
+    enableAllFirmware = true;
+    bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+    };
+    alsa.enable = true;
+  };
+
+  # ════════════════════════════════════════════════════════════════
+  # Networking
+  # ════════════════════════════════════════════════════════════════
+  networking = {
+    hostName = "nixos";
+    networkmanager = {
+      enable = true;
+      wifi.backend = "iwd";
+    };
+    firewall = {
+      allowedTCPPorts = [ 631 ];
+      allowedUDPPorts = [ 631 ];
+    };
+  };
+
+  # ════════════════════════════════════════════════════════════════
+  # Localization & Time
+  # ════════════════════════════════════════════════════════════════
+  time.timeZone = "Europe/Berlin";
+  i18n = {
+    defaultLocale = "en_US.UTF-8";
+    extraLocaleSettings = {
+      LC_ADDRESS        = "de_DE.UTF-8";
+      LC_IDENTIFICATION = "de_DE.UTF-8";
+      LC_MEASUREMENT    = "de_DE.UTF-8";
+      LC_MONETARY       = "de_DE.UTF-8";
+      LC_NAME           = "de_DE.UTF-8";
+      LC_NUMERIC        = "de_DE.UTF-8";
+      LC_PAPER          = "de_DE.UTF-8";
+      LC_TELEPHONE      = "de_DE.UTF-8";
+      LC_TIME           = "de_DE.UTF-8";
+    };
+  };
+  console.keyMap = "de";
+
+  # ════════════════════════════════════════════════════════════════
+  # Services (GUI, Audio, Power, LTE)
+  # ════════════════════════════════════════════════════════════════
+  services = {
+    # Display & Desktop
+    xserver = {
+      enable = true;
+      videoDrivers = [ "modesetting" ];
+      xkb = {
+        layout = "de";
+        variant = "";
+        options = "caps:swapescape";
+      };
+    };
+    displayManager = {
+      sddm = {
+        enable = true;
+        wayland.enable = true;
+      };
+      defaultSession = "plasma";
+    };
+    desktopManager.plasma6.enable = true;
+
+    # Audio (Pipewire)
+    pulseaudio.enable = false;
+    pipewire = {
+      enable = lib.mkForce true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      jack.enable = true;
+      wireplumber.enable = true;
+    };
+
+    # Power Management
+    thermald.enable = true;
+    power-profiles-daemon.enable = false;
+    tlp = {
+      enable = true;
+      settings = {
+        CPU_SCALING_GOVERNOR_ON_AC = "performance";
+        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+        CPU_BOOST_ON_AC = 1;
+        CPU_BOOST_ON_BAT = 0;
+      };
+    };
+
+    # Other Services
+    pcscd.enable = true;
+    blueman.enable = true;
+    seatd.enable = false;
+    flatpak.enable = true;
+    tailscale.enable = true;
+  };
+
+  # LTE ModemManager & udev rules
+  systemd.services.ModemManager.serviceConfig = {
+    ExecStart = [ "" "${pkgs.modemmanager}/bin/ModemManager --debug" ];
+    Restart = "always";
+    RestartSec = "5s";
+  };
+
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="2cb7", ATTR{idProduct}=="0210", RUN+="${pkgs.usb-modeswitch}/bin/usb_modeswitch -v 0x2cb7 -p 0x0210 -R"
+  '';
+
+  # ════════════════════════════════════════════════════════════════
+  # Printing & Discovery (CUPS)
+  # ════════════════════════════════════════════════════════════════
+  services.printing = {
+    enable = true;
+    browsing = true;
+    listenAddresses = [ "localhost:631" ];
+    allowFrom = [ "localhost" "192.168.1.*" "192.168.151.*" ];
+    defaultShared = true;
+    drivers = with pkgs; [ gutenprint hplip cups-dymo ];
+    
+    browsedConf = ''
+      BrowsePoll 192.168.151.112:631
+      BrowsePoll 192.168.1.217:631
+      BrowsePoll 192.168.1.150:631
+      BrowsePoll 192.168.1.186:631
+      BrowseInterval 30
+      BrowseTimeout 3600
+      CreateIPPPrinterQueues All
+    '';
+  };
+
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
+
+  hardware.printers = {
+    ensureDefaultPrinter = "Dymo_LabelWriter_450";
+    ensurePrinters = [
+      {
+        name = "Dymo_LabelWriter_450";
+        location = "Office";
+        deviceUri = "socket://192.168.1.186";
+        model = "lw450t.ppd";
+      }
+      {
+        name = "Dymo_LabelWriter_Trainee";
+        location = "Office";
+        deviceUri = "socket://192.168.1.186:9100";
+        model = "lw450t.ppd";
+      }
+    ];
+  };
+
+  # ════════════════════════════════════════════════════════════════
+  # Virtualization
+  # ════════════════════════════════════════════════════════════════
+  virtualisation = {
+    docker.enable = true;
+    libvirtd.enable = true;
+    spiceUSBRedirection.enable = true;
+  };
+
+  # ════════════════════════════════════════════════════════════════
+  # Programs & Shell
+  # ════════════════════════════════════════════════════════════════
+  programs = {
+    direnv.enable = true;
+    direnv.nix-direnv.enable = true;
+    hyprland.enable = true;
+    virt-manager.enable = true;
+    ssh.startAgent = false;
+    firefox.enable = true;
+    
+    zsh = {
+      enable = true;
+      enableCompletion = true;
+      enableBashCompletion = true;
+      autosuggestions.enable = true;
+      syntaxHighlighting.enable = true;
+      histSize = 10000;
+      shellAliases = {
+        ll = "lsd -la";
+        la = "lsd -a";
+        ls = "lsd";
+        cat = "bat";
+        rebuild = "sudo nixos-rebuild switch --flake /home/ll/nix#nixos";
+        update = "cd /home/ll/nix && nix flake update && sudo nixos-rebuild switch --flake .#nixos";
+      };
+      setOptions = [ "AUTO_CD" ];
+      promptInit = ''
+        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+      '';
+      ohMyZsh = {
+        enable = true;
+        plugins = [ "git" "dirhistory" "history" ];
+      };
+    };
+  };
+
+  # ════════════════════════════════════════════════════════════════
+  # Users & Security
+  # ════════════════════════════════════════════════════════════════
+  security.rtkit.enable = true;
+  security.polkit.enable = true;
+  
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.sddm.enableGnomeKeyring = true;
+
+  users = {
+    defaultUserShell = pkgs.zsh;
+    users.ll = {
+      isNormalUser = true;
+      description = "ll";
+      home = "/home/ll";
+      extraGroups = [ "networkmanager" "wheel" "audio" "video" "input" "seat" "docker" ];
+      packages = with pkgs; [ kdePackages.kate ];
+    };
+  };
+  system.userActivationScripts.zshrc = "touch .zshrc";
+
+  # ════════════════════════════════════════════════════════════════
+  # Environment, Portals & Nix Settings
+  # ════════════════════════════════════════════════════════════════
+  xdg.portal = {
+    enable = true;
+    extraPortals = with pkgs; [ xdg-desktop-portal-gtk ];
+  };
+
+  powerManagement.enable = true;
+
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nixpkgs.config.allowUnfree = true;
+
+  environment.sessionVariables = {
+    LIBVA_DRIVER_NAME = "iHD";
+    NIXOS_OZONE_WL = "1";
+  };
+  environment.shells = with pkgs; [ zsh ];
+
+  # ════════════════════════════════════════════════════════════════
+  # System Packages
+  # ════════════════════════════════════════════════════════════════
+  environment.systemPackages = with pkgs; [
+    # System Tools & Utilities
+    git home-manager curl wget file wl-clipboard xclip fzf gnupg bottom 
+    lshw lsd bat tree-sitter neofetch nerdfetch unzip ripgrep fd superfile
+    tmux 
+
+    # Network & VPN
+    wg-netmanager wireguard-tools modemmanager networkmanagerapplet gnome-keyring libsecret tailscale 
+
+    # Hardware & Diagnostics
+    usbutils pciutils mesa-demos libva-utils intel-gpu-tools solaar
+
+    # Disk & Boot Tools
+    woeusb gparted
+
+    # Tauri Dependencies
+    webkitgtk_4_1 gtk3 glib glib-networking cairo pango atk gdk-pixbuf 
+    librsvg libappindicator-gtk3 libdbusmenu-gtk3 libsoup_3 pkg-config 
+    openssl xdotool ydotool
+
+    # Development - Languages & Tools
+    gcc gnumake cmake python3 python313Packages.pip nodejs
+    rustc cargo rustup rustfmt clippy dioxus-cli wasm-bindgen-cli
+    pwgen mise github-copilot-cli up
+
+    # Dev Tools
+    lazygit zed-editor binsider bandwhich github-copilot-cli jq swaks 
+    subversion
+
+    # LaTeX & Documentation
+    texlive.combined.scheme-full sioyek
+
+    # Productivity
+    notesnook pay-respects caligula teams-for-linux zsh-powerlevel10k 
+    libreoffice anytype logseq
+
+    # Security & Auth
+    pam_u2f yubico-pam keepass
+
+    # Audio / Multimedia
+    alsa-utils pipewire wireplumber pavucontrol gimp flameshot
+
+    # Browser & Communication
+    chromium qutebrowser discord telegram-desktop aerc
+
+    # Bluetooth 
+    blueman bluez 
+
+    # Games
+    assaultcube luanti
+  ];
+
+  system.stateVersion = "25.05";
+}

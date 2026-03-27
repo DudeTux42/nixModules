@@ -4,33 +4,29 @@
   };
 
   xdg.configFile."zellij/config.kdl".text = ''
-
-    // Zellij Configuration
+    // --- Zellij Configuration ---
     
-    // Default shell
     default_shell "zsh"
-    
-    // Theme
     theme "catppuccin"
-    
-    // Copy behavior
     copy_on_select true
-    copy_command "wl-copy"  // For Wayland, use "xclip -selection clipboard" for X11
-    
-    // Mouse behavior
+    copy_command "wl-copy"
     mouse_mode true
     scroll_buffer_size 10000
-    
-    // Pane behavior
     pane_frames true
     auto_layout true
-    
-    // Session behavior
     session_serialization false
-    
-    // Keybindings
-    keybinds non_colliding=true {
+    show_startup_tips false
+    // --- Keybindings ---
+    keybinds {
+        // Dieser Modus reicht ALLES an Neovim weiter (SUPER wichtig!)
+        locked {
+            bind "Alt g" { SwitchToMode "Normal"; }
+        }
+
+        // Dein normaler Modus für Zellij-Aktionen
         normal {
+            bind "Alt g" { SwitchToMode "Locked"; }
+            
             // Movement between panes
             bind "Alt h" { MoveFocus "Left"; }
             bind "Alt l" { MoveFocus "Right"; }
@@ -55,21 +51,17 @@
             bind "Alt 4" { GoToTab 4; }
             bind "Alt 5" { GoToTab 5; }
             
-            // New tab
+            // Tab Management
             bind "Alt o" { NewTab; }
-            
-            // Rename tab
             bind "Alt r" { SwitchToMode "RenameTab"; TabNameInput 0; }
             
-            // Enter search mode
+            // Modes
             bind "Alt /" { SwitchToMode "Search"; }
-            
-            // Enter scroll mode
             bind "Alt s" { SwitchToMode "Scroll"; }
         }
-        
+
         scroll {
-            bind "Ctrl c" { SwitchToMode "Normal"; }
+            bind "Ctrl c" "Esc" { SwitchToMode "Normal"; }
             bind "j" "Down" { ScrollDown; }
             bind "k" "Up" { ScrollUp; }
             bind "d" { HalfPageScrollDown; }
@@ -77,18 +69,22 @@
         }
         
         search {
-            bind "Ctrl c" { SwitchToMode "Normal"; }
+            bind "Ctrl c" "Esc" { SwitchToMode "Normal"; }
             bind "n" { Search "down"; }
             bind "p" { Search "up"; }
         }
         
         renametab {
-            bind "Ctrl c" { SwitchToMode "Normal"; }
+            bind "Ctrl c" "Enter" { SwitchToMode "Normal"; }
             bind "Esc" { UndoRenameTab; SwitchToMode "Normal"; }
+        }
+
+        shared_except "locked" {
+            bind "Alt g" { SwitchToMode "Locked"; }
         }
     }
     
-    // UI configuration
+    // --- UI Configuration ---
     ui {
         pane_frames {
             rounded_corners true
@@ -96,7 +92,7 @@
         }
     }
     
-    // Plugins
+    // --- Plugins ---
     plugins {
         tab-bar { path "tab-bar"; }
         status-bar { path "status-bar"; }
@@ -104,7 +100,7 @@
         compact-bar { path "compact-bar"; }
     }
     
-    // Layout
+    // --- Layouts ---
     layouts {
         default {
             tab name="main" {

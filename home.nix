@@ -1,4 +1,4 @@
-{ config, pkgs, zen-browser, ... }:
+{ config, pkgs, ... }:
 
 {
   home = {
@@ -7,8 +7,7 @@
     stateVersion = "25.05";
   
     packages = with pkgs; [
-      # Hier können Sie zusätzliche Pakete für Ihren Benutzer definieren
-      # zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+      # User-specific packages
     ];
 
     sessionVariables = {
@@ -16,7 +15,6 @@
     };
   };
 
-  # Importieren Sie Ihre bestehenden Konfigurationen
   imports = [
    ./kitty.nix
    ./fonts.nix
@@ -27,7 +25,13 @@
    ./rofi.nix
    ./git.nix
    ./zsh.nix
+   ./hypr.nix
+   ./hyprlock.nix
+   ./waybar.nix
+   ./card-unlock.nix
+   ./flameshot.nix
+   ./nextcloud.nix
   ];
 
-  # Zusätzliche Konfigurationen können hier hinzugefügt werden
+  programs.home-manager.enable = true;
 }
