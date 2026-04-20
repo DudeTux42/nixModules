@@ -12,6 +12,7 @@
 
     sessionVariables = {
       EDITOR = "nvim";
+      PATH = "$HOME/.cargo/bin:$PATH";
     };
   };
 
