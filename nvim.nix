@@ -9,6 +9,8 @@ in
 {
   programs.neovim = {
     enable = true;
+    withRuby = false;
+    withPython3 = false;
     package = pkgs.neovim-unwrapped;
     vimAlias = true;
     vimdiffAlias = true;
