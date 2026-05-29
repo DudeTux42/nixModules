@@ -84,6 +84,9 @@
   # Services (GUI, Audio, Power, LTE)
   # ════════════════════════════════════════════════════════════════
   services = {
+    hardware.bolt.enable = true;
+    fwupd.enable = true;
+
     # Display & Desktop
     xserver = {
       enable = true;
@@ -145,57 +148,8 @@
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="2cb7", ATTR{idProduct}=="0210", RUN+="${pkgs.usb-modeswitch}/bin/usb_modeswitch -v 0x2cb7 -p 0x0210 -R"
   '';
-  # ════════════════════════════════════════════════════════════════
-  # Printing & Discovery (CUPS)
-  # ════════════════════════════════════════════════════════════════
-#   services.printing = {
-#     enable = true;
-#     browsing = true;
-#     listenAddresses = [ "localhost:631" ];
-#     allowFrom = [ "localhost" "192.168.1.*" "192.168.151.*" ];
-#     defaultShared = true;
-#     drivers = with pkgs; [ gutenprint hplip cups-dymo ];
-#
-#     browsedConf = ''
-#       BrowsePoll 192.168.151.112:631
-#       BrowsePoll 192.168.1.217:631
-#       BrowsePoll 192.168.1.150:631
-#       BrowseDeny 192.168.1.186 # Dymo label Drucker unten statisch definiert
-#       BrowseInterval 30
-#       BrowseTimeout 3600
-#       CreateIPPPrinterQueues All
-#     '';
-#   };
-#
-#   services.avahi = {
-#     enable = true;
-#     nssmdns4 = true;
-#     openFirewall = true;
-#   };
-#   hardware.printers = {
-#       ensureDefaultPrinter = "Trainees_Label_Schmal";
-#       ensurePrinters = [
-#         {
-#           name = "Trainees_Label_Schmal";
-#           location = "Trainees-Office";
-#           deviceUri = "ipp://192.168.1.186/printers/trainees_label-schmal";
-#           model = "everywhere";
-#         }
-#         {
-#           name = "Trainees_Label_Klein";
-#           location = "Office";
-#           deviceUri = "ipp://192.168.1.186/printers/trainees_label-klein";
-#           model = "everywhere";
-#         }
-#         {
-#           name = "Trainees_Label_Breit";
-#           location = "Office";
-#           deviceUri = "ipp://192.168.1.186/printers/trainees_label-breit";
-#           model = "everywhere";
-#         }
-#       ];
-#   };
-#
+ 
+
   # ════════════════════════════════════════════════════════════════
   # Printing & Discovery (CUPS)
   # ════════════════════════════════════════════════════════════════
@@ -215,9 +169,9 @@
       # Den Pi im Trainee-Büro aktiv abfragen (.186)
       BrowsePoll 192.168.1.186:631
 
-      # Die "Leichen" und das tote Subnetz ignorieren
-      BrowseDeny 192.168.151.112
-      BrowseDeny 192.168.1.150
+      # # Die "Leichen" und das tote Subnetz ignorieren
+      # BrowseDeny 192.168.151.112
+      # BrowseDeny 192.168.1.150
 
       BrowseInterval 30
       BrowseTimeout 3600
@@ -231,90 +185,6 @@
     openFirewall = true;
   };
 
-  # Den "ensurePrinters" Block unter hardware.printers bitte komplett löschen!
-#   # ════════════════════════════════════════════════════════════════
-#   # Printing & Discovery (CUPS)
-#   # ════════════════════════════════════════════════════════════════
-#   services.printing = {
-#     enable = true;
-#     browsing = true;
-#     listenAddresses = [ "localhost:631" ];
-#     allowFrom = [ "localhost" "192.168.1.*" "192.168.151.*" ];
-#     defaultShared = true;
-#     drivers = with pkgs; [ gutenprint hplip cups-dymo ];
-#     startWhenNeeded = false;
-#
-#     browsedConf = ''
-#       BrowsePoll 192.168.151.112:631
-#       BrowsePoll 192.168.1.217:631
-#       BrowsePoll 192.168.1.150:631
-#       BrowseDeny 192.168.151.114
-#       BrowseDeny 192.168.1.186
-#       BrowseInterval 30
-#       BrowseTimeout 3600
-#       CreateIPPPrinterQueues All
-#     '';
-#   };
-#
-#   services.avahi = {
-#     enable = true;
-#     nssmdns4 = true;
-#     openFirewall = true;
-#   };
-#
-#   hardware.printers = {
-#     ensureDefaultPrinter = "Canon_irADVC256i_Briefpapier_192_168_1_217";
-#
-#   ensurePrinters = [
-#       # --- Trainee-Büro (Pi .186) ---
-#       {
-#         name = "Trainees_Label_Schmal";
-#         deviceUri = "ipp://192.168.1.186/printers/trainees_label-schmal";
-#         model = "lw450.ppd"; # Nutzt den lokalen Dymo-Treiber
-#       }
-#       {
-#         name = "Trainees_Label_Klein";
-#         deviceUri = "ipp://192.168.1.186/printers/trainees_label-klein";
-#         model = "lw450.ppd";
-#       }
-#       {
-#         name = "Trainees_Label_Breit";
-#         deviceUri = "ipp://192.168.1.186/printers/trainees_label-breit";
-#         model = "lw450.ppd";
-#       }
-#
-#       # --- Haupt-Büro (Server .217) ---
-#       {
-#         name = "Office_Dymo_Schmal";
-#         deviceUri = "ipp://192.168.1.217/printers/Dymo_Schmal";
-#         model = "lw450.ppd";
-#       }
-#       {
-#         name = "Office_Dymo_Klein";
-#         deviceUri = "ipp://192.168.1.217/printers/Dymo_Klein";
-#         model = "lw450.ppd";
-#       }
-#       {
-#         name = "Office_Dymo_Breit";
-#         deviceUri = "ipp://192.168.1.217/printers/Dymo_Breit";
-#         model = "lw450.ppd";
-#       }
-#     ];
-#
-#   };
-#
-#   # ════════════════════════════════════════════════════════════════
-#   #          !!!!!!!!!!Workaround!!!!!!!!!!!:
-#   # ════════════════════════════════════════════════════════════════
-#   systemd.services.ensure-printers = {
-#     serviceConfig = {
-#       ExitStatus = "0 1";
-#       Restart = "on-failure";
-#       RestartSec = "2s";
-#     };
-#     stopIfChanged = false;
-#   };
-#
   # ════════════════════════════════════════════════════════════════
   # Virtualization
   # ════════════════════════════════════════════════════════════════
@@ -411,7 +281,8 @@
     tmux 
 
     # Network & VPN
-    wg-netmanager wireguard-tools modemmanager networkmanagerapplet gnome-keyring libsecret tailscale zenmap
+    wg-netmanager wireguard-tools modemmanager networkmanagerapplet
+    gnome-keyring libsecret tailscale zenmap polkit_gnome
 
     # Hardware & Diagnostics
     usbutils pciutils mesa-demos libva-utils intel-gpu-tools solaar
