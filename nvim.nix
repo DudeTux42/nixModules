@@ -15,14 +15,14 @@ in
     extraPackages = with pkgs; [
       lua-language-server
       nil
-      nodePackages.typescript-language-server
+      typescript-language-server
       python3Packages.python-lsp-server
       ripgrep
       fd
       gcc
       texliveFull
       tectonic
-      nodePackages.mermaid-cli
+      mermaid-cli
       sqlite
       ghostscript
       imagemagick
