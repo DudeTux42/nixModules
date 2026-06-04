@@ -42,15 +42,22 @@
           separate-outputs = true;
         };
         
-        
         "custom/keyboard" = {
-          exec = "hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) | .active_keymap' | sed 's/German/🇩🇪/' | sed 's/English (US, intl., with dead keys)/🇺🇸/'";
+          exec = "hyprctl devices -j | jq -r '.keyboards[] | select(.system_buttons == true) | .active_keymap' | head -n1 | sed 's/German/🇩🇪/' | sed 's/English (US, international, with AltGr dead keys)/🇺🇸/'";
           interval = 1;
           format = "{}";
-          on-click = "hyprctl switchxkblayout at-translated-set-2-keyboard next";
+          on-click = "hyprctl switchxkblayout all next";
           tooltip = false;
         };
         
+        # "custom/keyboard" = {
+        #   exec = "hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) | .active_keymap' | sed 's/German/🇩🇪/' | sed 's/English (US, international, with AltGr dead keys)/🇺🇸/'";
+        #   interval = 1;
+        #   format = "{}";
+        #   on-click = "hyprctl switchxkblayout at-translated-set-2-keyboard next";
+        #   tooltip = false;
+        # };
+        #
         tray = {
           spacing = 10;
         };

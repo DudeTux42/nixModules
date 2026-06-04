@@ -26,6 +26,7 @@ in
     firefox = {
       enable = true;
       languagePacks = [ "de" "en-US" ];
+      configPath = "${config.xdg.configHome}/mozilla/firefox";
 
       # Define your default profile.
       # Home Manager will create this profile if it doesn't exist,
@@ -112,30 +113,30 @@ in
         # This section forces the installation of specific add-ons using their internal IDs.
         # This is robust if the add-ons are not in Nixpkgs or you need `force_installed`.
         # You correctly have the internal IDs and install_urls here.
-        ExtensionSettings = {
-          "*".installation_mode = "blocked"; # blocks all addons except the ones specified below
-          # uBlock Origin:
-          "uBlock0@raymondhill.net" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
-            installation_mode = "force_installed"; # User cannot disable/remove
-          };
-          # Privacy Badger:
-          "jid1-MnnxcxisBPnSXQ@jetpack" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/privacy-badger17/latest.xpi";
-            installation_mode = "force_installed";
-          };
-          # 1Password:
-          "{d634138d-c276-4fc8-924b-40a0ea21d284}" = {
-            install_url = "https://addons.mozilla.org/firefox/downloads/latest/1password-x-password-manager/latest.xpi";
-            installation_mode = "force_installed";
-          };
-          # You can add Dark Reader here if you know its addon ID and install_url.
-          # Example (replace with actual ID and URL):
-          # "{darkreader-addon-id@mozilla.org}" = {
-          #   install_url = "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi";
-          #   installation_mode = "force_installed";
-          # };
-        };
+        # ExtensionSettings = {
+        #   "*".installation_mode = "blocked"; # blocks all addons except the ones specified below
+        #   # uBlock Origin:
+        #   "uBlock0@raymondhill.net" = {
+        #     install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+        #     installation_mode = "force_installed"; # User cannot disable/remove
+        #   };
+        #   # Privacy Badger:
+        #   "jid1-MnnxcxisBPnSXQ@jetpack" = {
+        #     install_url = "https://addons.mozilla.org/firefox/downloads/latest/privacy-badger17/latest.xpi";
+        #     installation_mode = "force_installed";
+        #   };
+        #   # 1Password:
+        #   "{d634138d-c276-4fc8-924b-40a0ea21d284}" = {
+        #     install_url = "https://addons.mozilla.org/firefox/downloads/latest/1password-x-password-manager/latest.xpi";
+        #     installation_mode = "force_installed";
+        #   };
+        #   # You can add Dark Reader here if you know its addon ID and install_url.
+        #   # Example (replace with actual ID and URL):
+        #   # "{darkreader-addon-id@mozilla.org}" = {
+        #   #   install_url = "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi";
+        #   #   installation_mode = "force_installed";
+        #   # };
+        # };
       }; # End policies
     }; # End programs.firefox
   }; # End programs

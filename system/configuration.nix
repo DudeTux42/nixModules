@@ -277,7 +277,7 @@
   environment.systemPackages = with pkgs; [
     # System Tools & Utilities
     git home-manager curl wget file wl-clipboard xclip fzf gnupg bottom 
-    lshw lsd bat tree-sitter neofetch nerdfetch unzip ripgrep fd superfile
+    lshw lsd bat tree-sitter fastfetch nerdfetch unzip ripgrep fd superfile
     tmux 
 
     # Network & VPN

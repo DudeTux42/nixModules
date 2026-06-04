@@ -11,6 +11,7 @@
     window_border_width 0
     hide_window_decorations yes
     active_border_color none
+    mouse_map middle release ungrabbed,grabbed paste_from_selection
     
     font_family      JetBrainsMono Nerd Font
     bold_font        auto
