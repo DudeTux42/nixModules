@@ -34,20 +34,18 @@
       }
 
       # --- Gestures ---
-      workspace_swipe=true
-      workspace_swipe_fingers=3
+      gesture=3,horizontal,workspace
 
       # --- Window Rules ---
-      windowrule=float,title:^(Picture-in-Picture)$
-      windowrule=pin,title:^(Picture-in-Picture)$
-      windowrule=size 640 360,title:^(Picture-in-Picture)$
-      windowrule=move 70% 70%,title:^(Picture-in-Picture)$
-      windowrule=keepaspectratio,title:^(Picture-in-Picture)$
-
+      # windowrule = float, title:^(Picture-in-Picture)$
+      # windowrule = pin, title:^(Picture-in-Picture)$
+      # windowrule = size 640 360, title:^(Picture-in-Picture)$
+      # windowrule = move 70% 70%, title:^(Picture-in-Picture)$
+      #
       # --- Layer Rules ---
-      layerrule=blur,waybar
-      layerrule=ignorezero,waybar
-
+      # layerrule = blur, waybar
+      # layerrule = ignorezero, waybar
+      #
       # --- General appearance ---
       general {
           gaps_in=1
