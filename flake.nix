@@ -1,60 +1,57 @@
 {
-  description = "NixOS System Configuration Flake";
+  description = "NixOS System Configuration";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    awww.url = "git+https://codeberg.org/LGFae/awww";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, awww, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, ... }@inputs:
     let
-      system = "x86_64-linux";
-      
-      # Overlay für unstable packages
-      overlays = [
-        (final: prev: {
-          unstable = import inputs.nixpkgs {
-            inherit system;
-            config.allowUnfree = true;
-          };
-        })
-      ];
-    in
-    {
+      # Helper: baut ein NixOS-System aus hostname + CPU-Architektur.
+      # Neuen Rechner hinzufügen = eine Zeile in nixosConfigurations.
+      mkSystem = hostname: system: nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules = [
+          # Overlay: pkgs.unstable ist überall verfügbar
+          {
+            nixpkgs.overlays = [(final: prev: {
+              unstable = import inputs.nixpkgs {
+                inherit system;
+                config.allowUnfree = true;
+              };
+            })];
+          }
+
+          # Hardware + host-spezifische Einstellungen
+          ./hosts/${hostname}/default.nix
+
+          # Gemeinsame Module (auf jedem Rechner gleich)
+          ./modules/common.nix
+          ./modules/desktop.nix
+
+          # Home Manager
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.users.ll = import ./home.nix;
+          }
+        ];
+      };
+
+    in {
       nixosConfigurations = {
-        nixos = nixpkgs.lib.nixosSystem {
-          inherit system;
-          
-          specialArgs = { inherit inputs; };
-          
-          modules = [
-            # Hardware config
-            ./hardware-configuration.nix
-            
-            # Apply overlay
-            { nixpkgs.overlays = overlays; }
-            
-            # Main system configuration
-            ./system/configuration.nix
-            
-            # VirtualBox module
-            ./vbox.nix
-            
-            # Home Manager integration
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "backup";
-              home-manager.users.ll = import ./home.nix;
-            }
-          ];
-        };
+        t480s = mkSystem "t480s" "x86_64-linux";
+
+        # Neuen Rechner so hinzufügen:
+        # newmachine = mkSystem "newmachine" "x86_64-linux";
       };
     };
 }

@@ -278,7 +278,7 @@
     # System Tools & Utilities
     git home-manager curl wget file wl-clipboard xclip fzf gnupg bottom 
     lshw lsd bat tree-sitter fastfetch nerdfetch unzip ripgrep fd superfile
-    tmux 
+    tmux ouch
 
     # Network & VPN
     wg-netmanager wireguard-tools modemmanager networkmanagerapplet
@@ -326,6 +326,61 @@
     # Games
     assaultcube luanti
   ];
+
+  # ════════════════════════════════════════════════════════════════
+  # Firefox System-wide Policies (override default)
+  # ════════════════════════════════════════════════════════════════
+  environment.etc."firefox/policies/policies.json" = lib.mkForce {
+    text = builtins.toJSON {
+      policies = {
+        DisableTelemetry = true;
+        DisableFirefoxStudies = true;
+        DisablePocket = true;
+        DisableFirefoxAccounts = false;
+        DisableAccounts = false;
+        DisableFirefoxScreenshots = false;
+        DontCheckDefaultBrowser = true;
+
+        DisplayBookmarksToolbar = "always";
+        DisplayMenuBar = "default-off";
+        SearchBar = "unified";
+
+        EnableTrackingProtection = {
+          Value = true;
+          Locked = false;
+          Cryptomining = true;
+          Fingerprinting = true;
+        };
+
+        ExtensionSettings = {
+          "uBlock0@raymondhill.net" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+            installation_mode = "force_installed";
+          };
+          
+          "addon@darkreader.org" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi";
+            installation_mode = "force_installed";
+          };
+          
+          "tridactyl.vim@cmcaine.co.uk" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/tridactyl/latest.xpi";
+            installation_mode = "force_installed";
+          };
+          
+          "sponsorBlocker@ajaxy" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
+            installation_mode = "force_installed";
+          };
+          
+          "yt-nonstop@eai.me" = {
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/youtube-nonstop/latest.xpi";
+            installation_mode = "force_installed";
+          };
+        };
+      };
+    };
+  };
 
   system.stateVersion = "25.05";
 }
