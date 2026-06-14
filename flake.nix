@@ -34,6 +34,7 @@
           # Gemeinsame Module (auf jedem Rechner gleich)
           ./modules/common.nix
           ./modules/desktop.nix
+          ./modules/firefox.nix
 
           # Home Manager
           home-manager.nixosModules.home-manager

@@ -106,7 +106,7 @@
   programs = {
     direnv.enable            = true;
     direnv.nix-direnv.enable = true;
-    firefox.enable           = true;
+    # firefox.enable           = true;
     virt-manager.enable      = true;
     ssh.startAgent           = false; # gnome-keyring übernimmt
 
@@ -124,7 +124,6 @@
         la      = "lsd -a";
         ls      = "lsd";
         cat     = "bat";
-        # Hostname im Alias anpassen wenn du weitere Rechner hast
         rebuild = "sudo nixos-rebuild switch --flake /home/ll/nix#$(hostname)";
         update  = "cd /home/ll/nix && nix flake update && sudo nixos-rebuild switch --flake .#$(hostname)";
       };
@@ -168,7 +167,9 @@
   # ─────────────────────────────────────────
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nixpkgs.config.allowUnfree = true;
-
+  nixpkgs.config.permittedInsecurePackages = [
+    "electron-39.8.10"
+  ];
   powerManagement.enable = true;
 
   # ─────────────────────────────────────────
@@ -178,7 +179,7 @@
     # System & Utilities
     git home-manager curl wget file wl-clipboard xclip fzf gnupg
     lshw lsd bat tree-sitter fastfetch nerdfetch unzip ripgrep fd
-    superfile tmux bottom
+    superfile tmux bottom ouch
 
     # Netzwerk & VPN
     wg-netmanager wireguard-tools modemmanager
@@ -227,57 +228,64 @@
 
     # Spiele
     assaultcube luanti
+
+    # Man-Page: man nixos-config
+    (pkgs.runCommand "nixos-config-man" {} ''
+      mkdir -p $out/share/man/man1
+      cp ${../nixos-config.1} $out/share/man/man1/nixos-config.1
+      ${pkgs.gzip}/bin/gzip $out/share/man/man1/nixos-config.1
+    '')
   ];
 
   # ─────────────────────────────────────────
   # Firefox Policies (system-weit)
   # ─────────────────────────────────────────
-  environment.etc."firefox/policies/policies.json" = lib.mkForce {
-    text = builtins.toJSON {
-      policies = {
-        DisableTelemetry        = true;
-        DisableFirefoxStudies   = true;
-        DisablePocket           = true;
-        DisableFirefoxAccounts  = false;
-        DisableAccounts         = false;
-        DisableFirefoxScreenshots = false;
-        DontCheckDefaultBrowser = true;
-        DisplayBookmarksToolbar = "always";
-        DisplayMenuBar          = "default-off";
-        SearchBar               = "unified";
-
-        EnableTrackingProtection = {
-          Value         = true;
-          Locked        = false;
-          Cryptomining  = true;
-          Fingerprinting = true;
-        };
-
-        ExtensionSettings = {
-          "uBlock0@raymondhill.net" = {
-            install_url       = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
-            installation_mode = "force_installed";
-          };
-          "addon@darkreader.org" = {
-            install_url       = "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi";
-            installation_mode = "force_installed";
-          };
-          "tridactyl.vim@cmcaine.co.uk" = {
-            install_url       = "https://addons.mozilla.org/firefox/downloads/latest/tridactyl/latest.xpi";
-            installation_mode = "force_installed";
-          };
-          "sponsorBlocker@ajaxy" = {
-            install_url       = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
-            installation_mode = "force_installed";
-          };
-          "yt-nonstop@eai.me" = {
-            install_url       = "https://addons.mozilla.org/firefox/downloads/latest/youtube-nonstop/latest.xpi";
-            installation_mode = "force_installed";
-          };
-        };
-      };
-    };
-  };
+  # environment.etc."firefox/policies/policies.json" = lib.mkForce {
+  #   text = builtins.toJSON {
+  #     policies = {
+  #       DisableTelemetry        = true;
+  #       DisableFirefoxStudies   = true;
+  #       DisablePocket           = true;
+  #       DisableFirefoxAccounts  = false;
+  #       DisableAccounts         = false;
+  #       DisableFirefoxScreenshots = false;
+  #       DontCheckDefaultBrowser = true;
+  #       DisplayBookmarksToolbar = "always";
+  #       DisplayMenuBar          = "default-off";
+  #       SearchBar               = "unified";
+  #
+  #       EnableTrackingProtection = {
+  #         Value         = true;
+  #         Locked        = false;
+  #         Cryptomining  = true;
+  #         Fingerprinting = true;
+  #       };
+  #
+  #       ExtensionSettings = {
+  #         "uBlock0@raymondhill.net" = {
+  #           install_url       = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+  #           installation_mode = "force_installed";
+  #         };
+  #         "addon@darkreader.org" = {
+  #           install_url       = "https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi";
+  #           installation_mode = "force_installed";
+  #         };
+  #         "tridactyl.vim@cmcaine.co.uk" = {
+  #           install_url       = "https://addons.mozilla.org/firefox/downloads/latest/tridactyl/latest.xpi";
+  #           installation_mode = "force_installed";
+  #         };
+  #         "sponsorBlocker@ajaxy" = {
+  #           install_url       = "https://addons.mozilla.org/firefox/downloads/latest/sponsorblock/latest.xpi";
+  #           installation_mode = "force_installed";
+  #         };
+  #         "yt-nonstop@eai.me" = {
+  #           install_url       = "https://addons.mozilla.org/firefox/downloads/latest/youtube-nonstop/latest.xpi";
+  #           installation_mode = "force_installed";
+  #         };
+  #       };
+  #     };
+  #   };
+  # };
 
   # ─────────────────────────────────────────
   # State Version

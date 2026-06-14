@@ -1,0 +1,239 @@
+.TH NIXOS\-CONFIG 1 "2026" "ll" "NixOS Configuration"
+
+.SH NAME
+nixos\-config \- persönliche NixOS Flake-Konfiguration (t480s & mehr)
+
+.SH SYNOPSIS
+.B rebuild
+.br
+.B update
+.br
+.B sudo nixos\-rebuild
+.RI [ switch | test | build | switch\ \-\-rollback ]
+.B \-\-flake
+.RI .# hostname
+
+.SH BESCHREIBUNG
+Flake-basierte NixOS-Konfiguration für mehrere Rechner.
+Das Repo liegt unter
+.B ~/nix/
+und wird über
+.BR git (1)
+versioniert. Alle Änderungen am System gehen durch dieses Repo —
+kein manuelles Editieren von /etc/nixos/.
+
+.SH STRUKTUR
+
+.TP
+.B flake.nix
+Einstiegspunkt. Definiert alle Hosts via mkSystem-Helper.
+
+.TP
+.B flake.lock
+Versions-Pin aller Inputs. Immer committen nach
+.BR "nix flake update" .
+
+.TP
+.B home.nix
+Home Manager Konfiguration (gilt für alle Hosts).
+
+.TP
+.B modules/common.nix
+Alles was auf jedem Rechner gleich ist: Pakete, Shell,
+Virtualisierung, Nix-Settings, User.
+
+.TP
+.B modules/desktop.nix
+Grafischer Desktop-Stack: Plasma 6, Hyprland, Pipewire,
+SDDM, Avahi, Drucker-Basis.
+
+.TP
+.B hosts/t480s/default.nix
+T480s-spezifisch: Intel-Grafik, LTE-Modem, TLP,
+Logitech, Büro-Drucker.
+
+.TP
+.B hosts/t480s/hardware-configuration.nix
+Automatisch generiert von nixos-generate-config.
+Nicht manuell bearbeiten.
+
+.SH FAUSTREGEL
+
+.TP
+Paket für alle Rechner
+.B modules/common.nix
+
+.TP
+Desktop-Einstellung ändern
+.B modules/desktop.nix
+
+.TP
+Nur T480s betrifft
+.B hosts/t480s/default.nix
+
+.TP
+Shell, Editor, Fonts, dotfiles
+.B home.nix
+und die jeweiligen Module (hypr.nix, kitty.nix usw.)
+
+.TP
+Neuer Rechner
+.B hosts/<name>/default.nix
++ Eintrag in flake.nix
+
+.SH BEFEHLE
+
+.TP
+.B rebuild
+System rebuilden ohne Pakete zu updaten.
+Alias für: sudo nixos-rebuild switch --flake ~/nix#$(hostname)
+
+.TP
+.B update
+Alle Flake-Inputs updaten, dann rebuilden.
+Alias für: cd ~/nix && nix flake update && sudo nixos-rebuild switch --flake .#$(hostname)
+
+.TP
+.B sudo nixos-rebuild test --flake .#t480s
+Neue Config aktivieren ohne sie dauerhaft zu machen.
+Beim nächsten Boot ist die alte Generation wieder aktiv.
+
+.TP
+.B sudo nixos-rebuild build --flake .#t480s
+Nur bauen, nichts aktivieren. Zum Prüfen ob der Build durchläuft.
+
+.TP
+.B sudo nixos-rebuild switch --rollback
+Auf die letzte funktionierende Generation zurückrollen.
+
+.TP
+.B sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
+Alle gespeicherten Generationen anzeigen.
+
+.TP
+.B nix flake update
+Alle Inputs (nixpkgs, home-manager) auf neueste Version heben.
+Danach: git add flake.lock && git commit -m "flake: update inputs"
+
+.TP
+.B nix flake lock --update-input home-manager
+Nur einen einzelnen Input updaten.
+
+.SH NEUEN RECHNER EINRICHTEN
+
+.PP
+1. NixOS vom USB booten, Partitionen anlegen, nach /mnt mounten.
+
+.PP
+2. Hardware-Config generieren:
+.nf
+    nixos-generate-config --root /mnt
+.fi
+
+.PP
+3. Repo holen:
+.nf
+    nix-shell -p git --run \\
+      "git clone https://github.com/dein/nixconfig /mnt/home/ll/nix"
+.fi
+
+.PP
+4. Host anlegen:
+.nf
+    mkdir -p /mnt/home/ll/nix/hosts/newmachine
+    cp /mnt/etc/nixos/hardware-configuration.nix \\
+       /mnt/home/ll/nix/hosts/newmachine/
+.fi
+
+.PP
+5. hosts/newmachine/default.nix erstellen (Minimalbeispiel):
+.nf
+    { config, pkgs, lib, ... }: {
+      imports = [ ./hardware-configuration.nix ];
+      networking.hostName = "newmachine";
+
+      # AMD-Grafik (Beispiel):
+      hardware.graphics.extraPackages = with pkgs; [ amdvlk ];
+      environment.sessionVariables.LIBVA_DRIVER_NAME = "radeonsi";
+    }
+.fi
+
+.PP
+6. In flake.nix eintragen:
+.nf
+    newmachine = mkSystem "newmachine" "x86_64-linux";
+.fi
+
+.PP
+7. Installieren:
+.nf
+    git -C /mnt/home/ll/nix add .
+    nixos-install --flake /mnt/home/ll/nix#newmachine
+.fi
+
+.SH ROLLBACK
+
+.PP
+Im laufenden System:
+.nf
+    sudo nixos-rebuild switch --rollback
+.fi
+
+.PP
+Beim Booten: in systemd-boot den vorherigen Eintrag wählen,
+dann im gestarteten System den Rollback dauerhaft machen:
+.nf
+    sudo nixos-rebuild switch --rollback
+.fi
+
+.PP
+Via Git auf einen alten Commit zurück:
+.nf
+    git checkout abc1234
+    sudo nixos-rebuild switch --flake .#$(hostname)
+    git checkout main
+.fi
+
+.SH HÄUFIGE FEHLER
+
+.TP
+.B does not provide attribute nixosConfigurations."nixos"
+Der Hostname ist noch "nixos" (vor dem ersten Switch).
+Lösung: sudo nixos-rebuild switch --flake .#t480s
+
+.TP
+.B Path 'xyz' is not tracked by Git
+Neue Datei angelegt aber noch kein git add.
+Lösung: git add . && rebuild
+
+.TP
+.B Build schlägt fehl, System läuft noch
+Einfach rebooten — die letzte Generation ist noch aktiv.
+Oder: sudo nixos-rebuild switch --rollback
+
+.SH DATEIEN
+
+.TP
+.B ~/nix/
+Haupt-Repo. Alles liegt hier.
+
+.TP
+.B ~/nix/flake.lock
+Nicht manuell bearbeiten. Wird von nix flake update verwaltet.
+
+.TP
+.B /nix/var/nix/profiles/system
+Aktive und vergangene Generationen des Systems.
+
+.TP
+.B /etc/nixos/
+Wird nicht mehr verwendet — alles läuft über den Flake.
+
+.SH SIEHE AUCH
+.BR nixos-rebuild (8),
+.BR nix (1),
+.BR home-manager (1),
+.BR git (1)
+
+.SH AUTOR
+ll
