@@ -35,6 +35,7 @@
           ./modules/common.nix
           ./modules/desktop.nix
           ./modules/firefox.nix
+          ./modules/libvirt.nix
 
           # Home Manager
           home-manager.nixosModules.home-manager
@@ -42,7 +43,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.users.ll = import ./home.nix;
+            home-manager.users.ll = import ./home/home.nix;
           }
         ];
       };

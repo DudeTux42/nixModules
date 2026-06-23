@@ -13,7 +13,7 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ../../vbox.nix
+    ../../modules/vbox.nix
   ];
 
   networking.hostName = "t480s";
