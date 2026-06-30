@@ -17,21 +17,21 @@
   };
 
   imports = [
-   ./home/modules/kitty.nix
-   ./home/modules/fonts.nix
-   ./home/modules/nvim.nix
-   ./home/modules/zellij.nix
-   ./home/modules/bottom.nix
-   ./home/modules/firefox.nix
-   ./home/modules/rofi.nix
-   ./home/modules/git.nix
-   ./home/modules/zsh.nix
-   ./home/modules/hypr.nix
-   ./home/modules/hyprlock.nix
-   ./home/modules/waybar.nix
-   ./home/modules/card-unlock.nix
-   ./home/modules/flameshot.nix
-   ./home/modules/nextcloud.nix
+   ./modules/kitty.nix
+   ./modules/fonts.nix
+   ./modules/nvim.nix
+   ./modules/zellij.nix
+   ./modules/bottom.nix
+   ./modules/firefox.nix
+   ./modules/rofi.nix
+   ./modules/git.nix
+   ./modules/zsh.nix
+   ./modules/hypr.nix
+   ./modules/hyprlock.nix
+   ./modules/waybar.nix
+   ./modules/card-unlock.nix
+   ./modules/flameshot.nix
+   ./modules/nextcloud.nix
   ];
 
   programs.home-manager.enable = true;

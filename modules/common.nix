@@ -214,7 +214,7 @@
     libreoffice anytype logseq
 
     # Sicherheit & Auth
-    pam_u2f yubico-pam keepass
+    pam_u2f yubico-pam keepass yubikey-manager
 
     # Audio / Multimedia
     alsa-utils pipewire wireplumber pavucontrol

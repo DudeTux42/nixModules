@@ -22,7 +22,13 @@
   };
 
   # ─────────────────────────────────────────
-  # Display Manager & Desktop
+  # Globale Audio- & Security-Optionen (Top-Level Scope)
+  # ─────────────────────────────────────────
+  hardware.pulseaudio.enable = false;
+  security.rtkit.enable = true;
+
+  # ─────────────────────────────────────────
+  # Systemd & Daemons (Services Scope)
   # ─────────────────────────────────────────
   services = {
     xserver = {
@@ -45,17 +51,13 @@
 
     desktopManager.plasma6.enable = true;
 
-    # ─────────────────────────────────────────
-    # Audio
-    # ─────────────────────────────────────────
-    pulseaudio.enable = false; # Pipewire übernimmt
-
+    # Pipewire sauber im services-Scope deklariert
     pipewire = {
-      enable            = lib.mkForce true;
-      alsa.enable       = true;
-      alsa.support32Bit = true;
-      pulse.enable      = true;
-      jack.enable       = true;
+      enable             = lib.mkForce true;
+      alsa.enable        = true;
+      alsa.support32Bit  = true;
+      pulse.enable       = true;
+      jack.enable        = true;
       wireplumber.enable = true;
     };
 
